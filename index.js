@@ -1,6 +1,8 @@
 const express = require("express")
 const cors = require("cors")
 const bcrypt = require("bcryptjs")
+const multer = require("multer")
+
 
 const bodyParser = require("body-parser")
 require("./db/conn")
@@ -15,23 +17,38 @@ app.use(cors())
 
 app.use(bodyParser.json())
 
+app.use('/public/avatar', express.static('public/avatar'))
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './public/avatar')
+    },
+    filename: function (req, file, cb) {
+      cb(null, `${file.originalname}`)
+    }
+  })
+  
+const upload = multer({ storage: storage })
+
 // app.get("/", (req, res) => {
 //     res.send("Hello World")
 // })
-app.post("/register", async (req, res) => {
+app.post("/register",upload.single("image"), async (req, res) => {
     try {
+        console.log(req.body,req.file)
 
         const registeredUser = new User({
             username: req.body.username,
             password: req.body.password,
             bio: req.body.bio,
+            profilePath:req.file.path
         })
         const token = await registeredUser.generateAuthToken();
         console.log(registeredUser)
         const registered = await registeredUser.save();
 
         res.json({ jwt_token: token })
-        // console.log(data)
+        console.log(data)
     } catch (e) {
         res.json({ error_msg: "unable to register" })
     }
@@ -67,8 +84,8 @@ app.get("/user", async (req, res) => {
         const auth = req.headers.authorization
         if (req.headers.authorization) {
             const userData = await User.findOne({ token: auth.slice(7, auth.length) })
-            const { username, bio } = userData
-            res.json({ username, bio })
+            const { username, bio,profilePath } = userData
+            res.json({ username, bio,profilePath })
         }
     }
     catch (e) {
