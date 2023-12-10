@@ -1,7 +1,6 @@
 {
     "version": 2,
     "name": "jobby-api",
-    "handle": "filesystem" ,
     "builds": [
       { "src": "index.js", "use": "@vercel/node" }
     ],
