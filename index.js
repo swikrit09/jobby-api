@@ -30,9 +30,10 @@ const storage = multer.diskStorage({
   
 const upload = multer({ storage: storage })
 
-// app.get("/", (req, res) => {
-//     res.send("Hello World")
-// })
+app.get("/", (req, res) => {
+    res.send("Hello World")
+})
+
 app.post("/register",upload.single("image"), async (req, res) => {
     try {
         console.log(req.body,req.file)
