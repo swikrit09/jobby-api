@@ -14,9 +14,7 @@ const port = process.env.PORT || 8080
 
 const app = express()
 
-app.use(cors({
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-}))
+app.use(cors())
 
 app.use(bodyParser.json())
 
@@ -42,15 +40,15 @@ app.post("/register", upload.single("image"), async (req, res) => {
         console.log(req.body, req.file);
 
         // Use async/await for Cloudinary upload
-        // const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
-        // console.log('Upload successful:', cloudinaryResponse);
+        const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+        console.log('Upload successful:', cloudinaryResponse);
 
         // Create a new user with the Cloudinary URL as the profile path
         const registeredUser = new User({
             username: req.body.username,
             password: req.body.password,
             bio: req.body.bio,
-            // profilePath: cloudinaryResponse.url 
+            profilePath: cloudinaryResponse.url 
         });
 
         // Generate auth token and save user
