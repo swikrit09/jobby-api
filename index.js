@@ -1,13 +1,9 @@
 const express = require("express")
 const cors = require("cors")
 const bcrypt = require("bcryptjs")
+
 const multer = require("multer")
 const { uploadOnCloudinary } = require('./utils/cloudinary');
-
-// Now you can use uploadOnCloudinary function
-
-
-
 
 const bodyParser = require("body-parser")
 require("./db/conn")
@@ -18,7 +14,9 @@ const port = process.env.PORT || 8080
 
 const app = express()
 
-app.use(cors())
+app.use(cors({
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+}))
 
 app.use(bodyParser.json())
 
