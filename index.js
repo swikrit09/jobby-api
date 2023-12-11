@@ -2,6 +2,11 @@ const express = require("express")
 const cors = require("cors")
 const bcrypt = require("bcryptjs")
 const multer = require("multer")
+const { uploadOnCloudinary } = require('./utils/cloudinary');
+
+// Now you can use uploadOnCloudinary function
+
+
 
 
 const bodyParser = require("body-parser")
@@ -21,39 +26,50 @@ app.use('/public/avatar', express.static('./public/avatar'))
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, './public/avatar')
+        cb(null, './public/avatar')
     },
     filename: function (req, file, cb) {
-      cb(null, `${file.originalname}`)
+        cb(null, `${file.originalname}`)
     }
-  })
-  
+})
+
 const upload = multer({ storage: storage })
 
 app.get("/", (req, res) => {
     res.send("Hello World")
 })
 
-app.post("/register",upload.single("image"), async (req, res) => {
+app.post("/register", upload.single("image"), async (req, res) => {
     try {
-        console.log(req.body,req.file)
+        console.log(req.body, req.file);
 
+        // Use async/await for Cloudinary upload
+        const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+        console.log('Upload successful:', cloudinaryResponse);
+
+        // Create a new user with the Cloudinary URL as the profile path
         const registeredUser = new User({
             username: req.body.username,
             password: req.body.password,
             bio: req.body.bio,
-            profilePath:req.file.path
-        })
+            profilePath: cloudinaryResponse.url 
+        });
+
+        // Generate auth token and save user
         const token = await registeredUser.generateAuthToken();
-        console.log(registeredUser)
+        console.log(registeredUser);
         const registered = await registeredUser.save();
 
-        res.json({ jwt_token: token })
-        console.log(data)
-    } catch (e) {
-        res.json({ error_msg: "unable to register" })
+        // Send response
+        res.json({ jwt_token: token });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error_msg: "unable to register" })
+        // res.send(error);
     }
-})
+});
+
+
 
 app.post("/login", async (req, res) => {
     try {
@@ -85,8 +101,8 @@ app.get("/user", async (req, res) => {
         const auth = req.headers.authorization
         if (req.headers.authorization) {
             const userData = await User.findOne({ token: auth.slice(7, auth.length) })
-            const { username, bio,profilePath } = userData
-            res.json({ username, bio,profilePath })
+            const { username, bio, profilePath } = userData
+            res.json({ username, bio, profilePath })
         }
     }
     catch (e) {
@@ -97,7 +113,7 @@ app.get("/user", async (req, res) => {
 app.get("/jobs", async (req, res) => {
     const auth = req.headers.authorization
     if (auth) {
-        const data=await Jobs.find()
+        const data = await Jobs.find()
         res.json(data)
     }
 })
