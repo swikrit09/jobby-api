@@ -34,7 +34,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 
 app.get("/", (req, res) => {
-    res.send("Hello World")
+    res.send("Hello Server")
 })
 
 app.post("/register", upload.single("image"), async (req, res) => {
