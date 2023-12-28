@@ -41,16 +41,24 @@ app.post("/register", upload.single("image"), async (req, res) => {
     try {
         console.log(req.body, req.file);
 
-        // Use async/await for Cloudinary upload
-        const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
-        console.log('Upload successful:', cloudinaryResponse);
+        let profilePath = '';
 
-        // Create a new user with the Cloudinary URL as the profile path
+        // Check if the image file is uploaded
+        if (req.file) {
+            // Use async/await for Cloudinary upload
+            const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+            console.log('Upload successful:', cloudinaryResponse);
+            profilePath = cloudinaryResponse.url; // Set the profile path if the image is uploaded
+        } else {
+            console.log('No image file uploaded');
+
+        }
+
         const registeredUser = new User({
             username: req.body.username,
             password: req.body.password,
             bio: req.body.bio,
-            profilePath: cloudinaryResponse.url 
+            profilePath: profilePath 
         });
 
         // Generate auth token and save user
@@ -62,10 +70,11 @@ app.post("/register", upload.single("image"), async (req, res) => {
         res.json({ jwt_token: token });
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error_msg: "unable to register" })
+        res.status(500).json({ error_msg: "unable to register" });
         // res.send(error);
     }
 });
+
 
 
 
