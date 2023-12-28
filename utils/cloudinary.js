@@ -7,22 +7,38 @@ cloudinary.config({
   api_secret: 'z0MtEl4GrQpF0YYacsy0c185aiE' 
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
-    try {
-        if (!localFilePath) {
-            console.log("file not found");
-            return null;
-        }
-        const response = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto"
+// const uploadOnCloudinary = async (localFilePath) => {
+//     try {
+//         if (!localFilePath) {
+//             console.log("file not found");
+//             return null;
+//         }
+//         const response = await cloudinary.uploader.upload(localFilePath, {
+//             resource_type: "auto"
+//         });
+//         console.log("file uploaded on cloudinary", response.url);
+//         return response;
+//     } catch (e) {
+//         //remove the locally saved temporary files when the upload operation is failed
+//         fs.unlinkSync(localFilePath);
+//         return null;
+//     }
+// };
+
+
+const uploadOnCloudinary = (buffer) => {
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
         });
-        console.log("file uploaded on cloudinary", response.url);
-        return response;
-    } catch (e) {
-        //remove the locally saved temporary files when the upload operation is failed
-        fs.unlinkSync(localFilePath);
-        return null;
-    }
+
+        // Write the buffer to the upload stream
+        uploadStream.end(buffer);
+    });
 };
 
 module.exports = { uploadOnCloudinary };

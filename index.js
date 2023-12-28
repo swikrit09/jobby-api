@@ -22,14 +22,16 @@ app.use(bodyParser.json())
 
 app.use('/public/new', express.static('./public/new'))
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './public/new')
-    },
-    filename: function (req, file, cb) {
-        cb(null, `${file.originalname}`)
-    }
-})
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, './public/new')
+//     },
+//     filename: function (req, file, cb) {
+//         cb(null, `${file.originalname}`)
+//     }
+// })
+
+const storage = multer.memoryStorage();
 
 const upload = multer({ storage: storage })
 
@@ -46,7 +48,7 @@ app.post("/register", upload.single("image"), async (req, res) => {
         // Check if the image file is uploaded
         if (req.file) {
             // Use async/await for Cloudinary upload
-            const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+            const cloudinaryResponse = await uploadOnCloudinary(req.file.buffer);
             console.log('Upload successful:', cloudinaryResponse);
             profilePath = cloudinaryResponse.url; // Set the profile path if the image is uploaded
         } else {
