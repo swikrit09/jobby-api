@@ -20,11 +20,11 @@ app.use(cors({
 
 app.use(bodyParser.json())
 
-app.use('/public/avatar', express.static('./public/avatar'))
+app.use('/public/new', express.static('./public/new'))
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, './public/avatar')
+        cb(null, './public/new')
     },
     filename: function (req, file, cb) {
         cb(null, `${file.originalname}`)
